@@ -13,7 +13,7 @@ public class Main {
 
     public static void SetEINThreshold(int size) {
 
-        System.out.println("Which ADT do you want to test out?\n1. AVL Tree\n2. Hash Table\n");
+        System.out.println("Which ADT do you want to test out?\n1. AVL Tree\n2. DoublyLinkedList\n");
         Scanner in = new Scanner(System.in);
         int choice = in.nextInt();
 
@@ -21,8 +21,7 @@ public class Main {
             AVL_Main.AVL_Main(size);
         }
         else if(choice == 2){
-            //Hash_Main.hash_main(size);
-            System.out.println("2. Hash Table\n");
+            DoublyLinkedList_Main.LinkedListDriver(size);
         }
 
 
