@@ -1,53 +1,66 @@
 package Small_Data;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.Scanner;
 
 public class DoublyLinkedList {
-    static int [] positions;
-    int indexOfEntry;
-    Node head = null;
-    Node tail = null;
 
-    static class Node{
-        int key;
-        String value;
-        Node next;
-        Node prev;
+    private int size;
+    private Node head;
+    private Node tail;
 
-        public Node(int key, String value) {
-            this.key = key;
-            this.value = value;
-        }
-    }
-    public DoublyLinkedList(int size) {
-        positions = new int[size];
-        indexOfEntry = 0;
+    public DoublyLinkedList() {
+        this.size = 0;
+        head = null;
+        tail = null;
+
     }
 
-    public static int SetEINThreshold(int Size) {
-        if(Size > 0 && Size <= 100){
-            return 100;
-        }
-        else if (Size > 100 && Size <= 500000) {
-            return 500000;
-        }
-        else{
-            return 0;
+    public int getSize() {
+        return this.size;
+    }
+
+    public void setSize(int Size) {
+        this.size = Size;
+    }
+
+    public Node getHead() {
+        return this.head;
+    }
+
+    public void setHead(Node newHead) {
+        this.head = newHead;
+    }
+
+    public Node getTail() {
+        return this.tail;
+    }
+
+    public void setTail(Node newTail) {
+        this.tail = newTail;
+    }
+
+    public boolean isEmpty() {
+        if (getSize() == 0) {
+            return true;
+        } else {
+            return false;
         }
     }
 
-    public static int generate() {
+    public int generate() {
         Random rnd = new Random();
         boolean dupeCheck = false;
         int newKey = rnd.nextInt(99999999);
+        int i = 0;
+        Node temp = getHead();
         while(dupeCheck == false){
-            for(int i = 0; i < positions.length; i++){
-                if(positions[i] == newKey){
+            while (i < getSize()) {
+                if (temp.getKey() == newKey) {
                     dupeCheck = true;
+                } else {
+                    temp = temp.getNext();
+                    i++;
                 }
             }
             break;
@@ -55,249 +68,215 @@ public class DoublyLinkedList {
         return newKey;
     }
 
-    public static int [] allKeys(DoublyLinkedList list) {
+
+    public int [] allKeys() {
         int max = 0;
-        int [] sortedKeys = new int[list.positions.length];
-        for(int i = 0; i < list.positions.length; i++) {
-            if (list.positions[i] > max) {
-                max = list.positions[i];
+        int [] keys = new int[getSize()];
+        int [] sortedKeys = new int[getSize()];
+        int i = 0;
+        Node temp = getHead();
+        while (i < getSize()) {
+            if (temp.getKey() > max) {
+                max = temp.getKey();
+            } else {
+                temp = temp.getNext();
+                i++;
             }
         }
 
+        temp = getHead();
+        int j = 0;
+        while (j < getSize()) {
+            keys[j] = temp.getKey();
+            temp = temp.getNext();
+            j++;
+        }
+
         for(int place = 1; max/place > 0; place *= 10){
-            int[] output = new int[positions.length + 1];
+            int[] output = new int[keys.length + 1];
             int[] count = new int[max + 1];
-            for (int i = 0; i < max; ++i)
-                count[i] = 0;
+            for (int k = 0; k < max; ++k)
+                count[k] = 0;
 
             // Calculate count of elements
-            for (int i = 0; i < positions.length; i++)
-                count[(positions[i] / place) % 10]++;
+            for (int k = 0; k < keys.length; k++)
+                count[(keys[k] / place) % 10]++;
 
             // Calculate cumulative count
-            for (int i = 1; i < 10; i++)
-                count[i] += count[i - 1];
+            for (int k = 1; k < 10; k++)
+                count[k] += count[k - 1];
 
             // Place the elements in sorted order
-            for (int i = positions.length - 1; i >= 0; i--) {
-                output[count[(positions[i] / place) % 10] - 1] = positions[i];
-                count[(positions[i] / place) % 10]--;
+            for (int k = keys.length - 1; k >= 0; k--) {
+                output[count[(keys[k] / place) % 10] - 1] = keys[k];
+                count[(keys[k] / place) % 10]--;
             }
 
-            for (int i = 0; i < positions.length; i++) {
-                sortedKeys[i] = output[i];
+            for (int k = 0; k < keys.length; k++) {
+                sortedKeys[k] = output[k];
             }
         }
         return sortedKeys;
     }
-    public static void add(DoublyLinkedList list, int key, String value) {
-        Node entry = new Node(key, value);
 
-        if(list.head == null) {
-            list.head = list.tail = entry;
-            list.head.prev = null;
-            list.tail.next = null;
-        }
 
-        else {
-            list.tail.next = entry;
-            entry.prev = list.tail;
-            list.tail = entry;
-            list.tail.next = null;
-        }
-        list.positions[list.indexOfEntry] = key;
-        list.indexOfEntry++;
-    }
-    public static void remove(DoublyLinkedList list, int key) {
-        int pos = 0;
-        for(int i = 0; i < positions.length; i++){
-            if(positions[i] != key) {
-                pos = i-1;
-            }
+    public void addLast(int key, String value) {
+        if (isEmpty()) {
+            Node newTail = new Node(key,value);
+            newTail.setPrev(null);
+            newTail.setNext(null);
+            setHead(newTail);
+            setTail(newTail);
+        } else {
+            Node newTail = new Node(key, value, getTail(), null);
+            getTail().setNext(newTail);
+            setTail(newTail);
         }
 
-        Node current = list.head;
-        for(int i = 1; i < pos; i++){
-            current = current.next;
-        }
+        setSize(getSize() + 1);
 
-        if(list.head.key == key){
-            list.head.key = current.next.key;
-        }
-
-        if(current.next != null){
-            current.next.prev = current.prev;
-        }
-
-        if(current.prev != null){
-            current.prev.next = current.next;
-        }
-        current = null;
-
-        int j = 0;
-        int [] temp = new int[positions.length];
-        for(int i = 0; i < positions.length; i++){
-            if(positions[i] != key) {
-                temp[j++] = positions[i];
-            }
-        }
-        positions = temp;
-        list.indexOfEntry = j;
     }
 
-    public static String getValue(DoublyLinkedList list, int key) {
-        Node current = list.head;
-        Node entry = null;
-        while(current != null) {
-            if(current.key == key) {
-                entry = current;
+    public String remove(int key) {
+        Node temp = getHead();
+        String value = "";
+        while (temp != getTail().getNext()) {
+            if (temp.getKey() == key) {
+                if (temp == getHead()) { // removes from head
+                    value = temp.getValue();
+                    temp = temp.getNext();
+                    temp.getPrev().setNext(null);
+                    temp.setPrev(null);
+                    setHead(temp);
+                    break;
+                } else if (temp == getTail()) { // removes from tail
+                    value = temp.getValue();
+                    temp = temp.getPrev();
+                    temp.getNext().setPrev(null);
+                    setTail(temp);
+                    break;
+                } else { // removes from anywhere
+                    value = temp.getValue();
+                    temp.getPrev().setNext(temp.getNext());
+                    temp.getNext().setPrev(temp.getPrev());
+                    break;
+                }
+            }
+
+            temp = temp.getNext();
+
+        }
+        setSize(getSize() - 1);
+        return value;
+    }
+
+    public String getValue(int key) {
+        int i = 0;
+        boolean found = false;
+        Node temp = getHead();
+        while (i < getSize()) {
+            if (temp.getKey() == key) {
+                found = true;
                 break;
+            } else {
+                temp = temp.getNext();
+                i++;
+
             }
-            current = current.next;
         }
-        return current.value;
+        if (found) {
+            return temp.getValue();
+        } else {
+            return null;
+        }
     }
 
-    public static int nextKey(DoublyLinkedList list, int key) {
-        Node current = list.head;
-        Node next = null;
-        while(current != null) {
-            if(current.key == key) {
-                next = current.next;
+    public int nextKey(int key) {
+        int i = 0;
+        boolean found = false;
+        Node temp = getHead();
+        while (i < getSize()) {
+            if (temp.getKey() == key) {
+                found = true;
                 break;
-            }
-            current = current.next;
-        }
-        return next.key;
-    }
-
-    public static int prevKey(DoublyLinkedList list, int key) {
-        Node current = list.head;
-        Node prev = null;
-        while(current != null) {
-            if(current.key == key) {
-                prev = current.prev;
-                break;
-            }
-            current = current.next;
-        }
-        return prev.key;
-    }
-
-    public static int rangeKey(int key1, int key2) {
-        int left = 0;
-        int right= 0;
-        boolean check = false;
-        int rangeCounter = 0;
-        for(int i = 0; i < positions.length; i++) {
-            if(positions[i] == key1) {
-                left = i;
-                check = true;
-            }
-
-        }
-        for(int i = left; i < positions.length; i++) {
-            if(positions[i] == key2) {
-                right = i;
-                check = true;
+            } else {
+                temp = temp.getNext();
+                i++;
             }
         }
-
-        if(check == true) {
-            return right - left - 1;
-        }
-
-        else {
+        if (found) {
+            return temp.getNext().getKey();
+        } else {
             return 0;
         }
     }
-    static void printList(DoublyLinkedList list)
-    {
-        Node temp = list.head;
-        if (temp == null)
-            System.out.print("Doubly Linked list empty");
 
-        while (temp != null)
-        {
-            System.out.print(temp.key + " ");
-            temp = temp.next;
+    public int prevKey(int key) {
+        int i = 0;
+        boolean found = false;
+        Node temp = getHead();
+        while (i < getSize()) {
+            if (temp.getKey() == key) {
+                found = true;
+                break;
+            } else {
+                temp = temp.getNext();
+                i++;
+            }
         }
-        System.out.println();
+        if (found) {
+            return temp.getPrev().getKey();
+        } else {
+            return 0;
+        }
     }
 
-    public static void main(String [] args) {
-        int size = 0;
-        DoublyLinkedList list = null;
-
-        try{
-            File file = new File("src/5.txt");
-            Scanner reader = new Scanner(file);
-            while(reader.hasNextLine()){
-                size++;
-                reader.nextLine();
-            }
-            reader.close();
-            list = new DoublyLinkedList(size);
-
-            reader = new Scanner(file);
-            while(reader.hasNextLine()) {
-                int key = Integer.parseInt(reader.nextLine());
-                String value = "";
-                add(list, key, value);
+    public int rangeKey(int key1, int key2) {
+        int i = 0;
+        int j = 0;
+        boolean found1 = false;
+        boolean found2 = false;
+        Node temp1 = getHead();
+        Node temp2 = getHead();
+        while (i < getSize()) {
+            if (temp1.getKey() == key1) {
+                found1 = true;
+                break;
+            } else {
+                temp1 = temp1.getNext();
+                i++;
             }
         }
-        catch(FileNotFoundException e){
-            System.out.println("File was not found");
+        while (j < getSize()) {
+            if (temp2.getKey() == key2) {
+                found2 = true;
+                break;
+            } else {
+                temp2 = temp2.getNext();
+                j++;
+            }
         }
+        if (found1 && found2) {
+            return ((j-i)-1);
+        } else {
+            return 0;
+        }
+    }
 
-		/*System.out.println("Welcome! Please choose the option you want: \n"+
-	                "1. allKeys(ElasticERL)\n" +
-	                "2. add(ElasticERL,key,value)\n" +
-	                "3. remove(ElasticERL,key)\n" +
-	                "4. getValue(ElasticERL,key)\n" +
-	                "5. nextKey(ElasticERL,key)\n" +
-	                "6. prevKey(ElasticERL,key)\n" +
-	                "7. rangeKey(key1, key2)\n" +
-	                "8. Exit\n");
-		Scanner in = new Scanner(System.in);
-        int choice = in.nextInt();
-        if (choice == 1) {
-        	System.out.print(Arrays.toString(allKeys(list)));
+    public void printList() {
+        if (isEmpty()) {
+            System.out.println("The list is empty");
+        } else {
+            System.out.println("Size of the list is: " + getSize());
+            Node temp = getHead();
+            while (temp != getTail()) {
+                System.out.print("Key: " + temp.getKey());
+                System.out.println(" Value: " + temp.getValue());
+                temp = temp.getNext();
+            }
+            System.out.print("Key: " + temp.getKey());
+            System.out.println(" Value: " + temp.getValue());
         }
-        else if(choice == 2) {
-        	String value = in.nextLine();
-        	add(list, generate(), value);
-        }
-        else if(choice == 3) {
-        	int key = in.nextInt();
-        	remove(list, key);
-        }
-        else if(choice == 4) {
-        	int key = in.nextInt();
-        	getValue(list, key);
-        }
-        else if(choice == 5) {
-        	int key = in.nextInt();
-        	nextKey(list, key);
-        }
-        else if(choice == 5) {
-        	int key = in.nextInt();
-        	prevKey(list, key);
-        }
-        else if(choice == 5) {
-        	int key1 = in.nextInt();
-        	int key2 = in.nextInt();
-        	rangeKey(key1, key2);
-        }*/
-
-        //printNodes(list);
-        //System.out.println(Arrays.toString(allKeys(list)));
-        //System.out.print(Arrays.toString(allKeys(list)));
-        System.out.println(Arrays.toString(list.positions));
-        printList(list);
-        remove(list, 70149901);
-        printList(list);
-        System.out.println(Arrays.toString(list.positions));
     }
 
 }
